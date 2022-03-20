@@ -58,25 +58,29 @@ async def root():
 
 @app.get('/posts')
 def get_posts():
-    return {"data": myposts}
+    cursor.execute('select * from posts')
+    posts = cursor.fetchall()
+    print(posts)
+    return {"data": posts}
 
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def createpost(post: Post):
-    post_dict = post.dict()
-    post_dict['id'] = randrange(0, 10000)
-    myposts.append(post_dict)
+    cursor.execute("""insert into posts(title, content, published) values(%s, %s, %s) 
+    returning * """, (post.title, post.content, post.published))
+    newpost = cursor.fetchone()
+    conn.commit()
 
-    return {'data': post_dict}
+    return {'data': newpost}
 
 
 @app.get('/posts/{id}')
 def get_post(id: int):
-    post = find_post(int(id))
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"post with id {id} not found")
-    return {'data': post}
+    cursor.execute("""select * from posts where id=%s 
+     """, (str(id)))
+    newpost = cursor.fetchone()
+
+    return {'data': newpost}
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
