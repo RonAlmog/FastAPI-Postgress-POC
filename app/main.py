@@ -79,28 +79,37 @@ def get_post(id: int):
     cursor.execute("""select * from posts where id=%s 
      """, (str(id)))
     newpost = cursor.fetchone()
+    if not newpost:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"post with id {id} not found")
 
     return {'data': newpost}
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
-    index = find_index_post(id)
-    if index == None:
+    cursor.execute('delete from posts where id=%s returning *', str(id),)
+    deletedpost = cursor.fetchone()
+    conn.commit()
+
+    if deletedpost == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id {id} not found")
-    myposts.pop(index)
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: Post):
-    index = find_index_post(id)
-    if index == None:
+    cursor.execute(
+        'update posts set title=%s, content=%s, published=%s where id=%s returning * ',
+        (post.title, post.content, post.published, str(id)))
+
+    updatedpost = cursor.fetchone()
+    conn.commit()
+
+    if updatedpost == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id {id} not found")
 
-    post_dict = post.dict()
-    post_dict['id'] = id
-    myposts[index] = post_dict
-    return {'data': post_dict}
+    return {'data': updatedpost}
