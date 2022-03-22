@@ -10,6 +10,8 @@ from . import models
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 from . import schemas
+from typing import List
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -36,23 +38,23 @@ async def root():
     return {"message": "Hello Worldz"}
 
 
-@app.get('/posts')
+@app.get('/posts', response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
-    return {"data": posts}
+    return posts
 
 
-@app.post('/posts', status_code=status.HTTP_201_CREATED)
+@app.post('/posts', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def createpost(post: schemas.PostCreate, db: Session = Depends(get_db)):
     newpost = models.Post(**post.dict())
     db.add(newpost)
     db.commit()
     db.refresh(newpost)
 
-    return {'data': newpost}
+    return newpost
 
 
-@app.get('/posts/{id}')
+@app.get('/posts/{id}', response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
 
@@ -60,7 +62,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id {id} not found")
 
-    return {'data': post}
+    return post
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -76,7 +78,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=schemas.Post)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
 
     postquery = db.query(models.Post).filter(models.Post.id == id)
@@ -89,4 +91,4 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     postquery.update(updated_post.dict(), synchronize_session=False)
     db.commit()
 
-    return {'data': postquery.first()}
+    return postquery.first()
