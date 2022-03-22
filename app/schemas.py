@@ -1,6 +1,10 @@
 
-from pydantic import BaseModel
+import email
+from urllib.parse import uses_fragment
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
+
+from app.database import Base
 
 
 class PostBase(BaseModel):
@@ -18,6 +22,20 @@ class PostCreate(PostBase):
 class Post(PostBase):
     # other fields are inherited
     id: int
+    created_at: datetime
+
+    class Config():
+        orm_mode = True
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
     created_at: datetime
 
     class Config():
