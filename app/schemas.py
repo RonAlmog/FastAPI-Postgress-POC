@@ -1,5 +1,4 @@
 
-import email
 from urllib.parse import uses_fragment
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
@@ -40,3 +39,8 @@ class UserOut(BaseModel):
 
     class Config():
         orm_mode = True
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
