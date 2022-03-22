@@ -43,7 +43,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
-def createpost(post: schemas.Post, db: Session = Depends(get_db)):
+def createpost(post: schemas.PostCreate, db: Session = Depends(get_db)):
     newpost = models.Post(**post.dict())
     db.add(newpost)
     db.commit()
@@ -77,7 +77,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/posts/{id}")
-def update_post(id: int, updated_post: schemas.Post, db: Session = Depends(get_db)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
 
     postquery = db.query(models.Post).filter(models.Post.id == id)
     post = postquery.first()
