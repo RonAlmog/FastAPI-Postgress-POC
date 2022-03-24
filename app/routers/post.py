@@ -1,3 +1,4 @@
+from app import oauth2
 from .. import schemas, models, utils
 from typing import Optional, List
 from urllib.request import Request
@@ -18,7 +19,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-def createpost(post: schemas.PostCreate, db: Session = Depends(get_db)):
+def createpost(post: schemas.PostCreate, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
     newpost = models.Post(**post.dict())
     db.add(newpost)
     db.commit()
