@@ -18,8 +18,16 @@ def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.
     return posts
 
 
+@router.get('/my', response_model=List[schemas.Post])
+def get_my_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    posts = db.query(models.Post).filter(
+        models.Post.owner_id == current_user.id).all()
+    print(current_user.email)
+    return posts
+
+
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-def createpost(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     newpost = models.Post(owner_id=current_user.id, **post.dict())
     db.add(newpost)
     db.commit()
