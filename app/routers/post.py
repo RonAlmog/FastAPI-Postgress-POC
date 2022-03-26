@@ -10,20 +10,30 @@ router = APIRouter(
     tags=['Posts']
 )
 
+# get all posts
+
 
 @router.get('/', response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    posts = db.query(models.Post).all()
+def get_posts(db: Session = Depends(get_db),
+              current_user: int = Depends(oauth2.get_current_user),
+              limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+
+    posts = db.query(models.Post).filter(
+        models.Post.title.contains(search)).offset(skip).limit(limit).all()
     print(current_user.email)
+    print(limit)
     return posts
 
 
+# get posts for the current user
 @router.get('/my', response_model=List[schemas.Post])
 def get_my_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).filter(
         models.Post.owner_id == current_user.id).all()
     print(current_user.email)
     return posts
+
+# create a post
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
@@ -35,6 +45,8 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
     # print(userid)
 
     return newpost
+
+# get one specific post
 
 
 @router.get('/{id}', response_model=schemas.Post)
