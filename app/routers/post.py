@@ -3,6 +3,7 @@ from typing import Optional, List
 from urllib.request import Request
 from fastapi import Body, Depends, FastAPI, Response, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import func, outerjoin
 from ..database import get_db
 
 router = APIRouter(
@@ -13,16 +14,19 @@ router = APIRouter(
 # get all posts
 
 
-@router.get('/', response_model=List[schemas.Post])
+@router.get('/', response_model=List[schemas.PostOut])
 def get_posts(db: Session = Depends(get_db),
               current_user: int = Depends(oauth2.get_current_user),
               limit: int = 10, skip: int = 0, search: Optional[str] = ""):
 
     posts = db.query(models.Post).filter(
         models.Post.title.contains(search)).offset(skip).limit(limit).all()
-    print(current_user.email)
-    print(limit)
-    return posts
+
+    results = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
+
+    # print(results)
+    return results
 
 
 # get posts for the current user

@@ -3,6 +3,8 @@ from urllib.parse import uses_fragment
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
+
+from sqlalchemy import Integer
 from app.database import Base
 
 
@@ -33,6 +35,14 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: UserOut
+
+    class Config():
+        orm_mode = True
+
+
+class PostOut(BaseModel):
+    Post: Post
+    votes: int
 
     class Config():
         orm_mode = True
