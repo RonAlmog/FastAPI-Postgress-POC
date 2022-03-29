@@ -7,7 +7,9 @@ from . import models
 from .routers import post, user, auth, vote
 from .config import settings
 
-models.Base.metadata.create_all(bind=engine)
+# create tables in db if they don't exist.
+# this line is not needed if you're using alembic
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
