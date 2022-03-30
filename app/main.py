@@ -1,9 +1,7 @@
-from urllib.request import Request
 from fastapi import FastAPI
-from psycopg2.extras import RealDictCursor
+from fastapi.middleware.cors import CORSMiddleware
 
 from .database import engine
-from . import models
 from .routers import post, user, auth, vote
 from .config import settings
 
@@ -13,7 +11,23 @@ from .config import settings
 
 app = FastAPI()
 
-# Dependency
+# allow cors access from these domains:
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+# to allow every domain:
+# origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(post.router)
