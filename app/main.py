@@ -17,6 +17,7 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
+    "http://mywebsite.com"
 ]
 # to allow every domain:
 # origins = ["*"]
