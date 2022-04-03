@@ -1,0 +1,35 @@
+version: "3"
+services:
+  api:
+    # we don't build on prod. we push the built image to repo and use it on prod
+    # build: .
+    image: mycompany/fastapi
+    depends_on:
+      - postgres
+    posts:
+      - 80:8000
+
+    # no need for command, its done in Dockerfile
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    env_file:
+      - ././env
+    environment:
+      - DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM}
+      - TOKEN_EXPIRATION=${TOKEN_EXPIRATION}
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+volumes:
+  postgres-db:
