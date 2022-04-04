@@ -49,3 +49,6 @@ websockets==10.2
 gunicorn
 httptools
 install uvloop
+
+pytest
+
