@@ -1,6 +1,6 @@
 from hashlib import new
 import pytest
-from app.calculations import add, BankAccount
+from app.calculations import add, BankAccount, InsufficientFunds
 
 # name your test function test_xxx
 
@@ -41,3 +41,16 @@ def test_deposit(bank_account):
 def test_interest(bank_account):
     bank_account.collect_interest()
     assert round(bank_account.balance, 4) == 55
+
+
+@pytest.mark.parametrize("deposited,withdrew,expected",
+                         [(200, 100, 100), (50, 40, 10), (1000, 200, 800)])
+def test_bank_transaction(zero_bank_account, deposited, withdrew, expected):
+    zero_bank_account.deposit(deposited)
+    zero_bank_account.withdraw(withdrew)
+    assert zero_bank_account.balance == expected
+
+
+def test_insufficient_funds(bank_account):
+    with pytest.raises(InsufficientFunds):
+        bank_account.withdraw(3000)
